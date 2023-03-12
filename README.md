@@ -13,15 +13,15 @@ The purpose of this script is to test the robustness of the target program by si
 Usage:
 
 ```
-python 001_automatic_fuzzer.py 127.0.0.1 1234
-python 001_automatic_fuzzer.py 127.0.0.1 1234 -i 1000
+001_automatic_fuzzer.py [-h] [-i INCREMENT] ip port
+001_automatic_fuzzer.py 127.0.0.1 1234
+001_automatic_fuzzer.py 127.0.0.1 1234 -i 1000
 ```
 
 Positional arguments:
-  ip                    IP address of the target
-  port                  Port number of the target
+  ip    					IP address of the target
+  port					Port number of the target
 
-options:
-  -h, --help            show this help message and exit
-  -i INCREMENT, --increment INCREMENT
-                        Increment value to be used, default is 100
+Optional arguments:
+  -h, --help                                                      					 show this help message and exit
+  -i INCREMENT, --increment INCREMENT					Increment value to be used, default is 100
