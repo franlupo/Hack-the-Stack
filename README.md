@@ -40,6 +40,7 @@ Itis intended for use in a controlled testing environment and should not be used
 Usage:
 
 ```
+002_eip_offset.py <ip> <port> <overflow_threshold>
 002_eip_offset.py 127.0.0.1 1234 50000
 ```
 

