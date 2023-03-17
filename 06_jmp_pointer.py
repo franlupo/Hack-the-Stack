@@ -68,7 +68,7 @@ if __name__ == "__main__":
 	# Parse command line arguments
 	parser = argparse.ArgumentParser(
 		prog="Jump Pointer",
-		description="""This is a Python script for checking if we our eip is being filled with the jmp pointer we passed as an argument. 
+		description="""This is a Python script for checking if we our EIP is being filled with the address to the JMP ESP intruction we passed as an argument. 
 	The script takes five arguments: an IP address, a port number, the EIP offset, an overflow threshold and the address to the JMP ESP instruction. After executing the script the EIP register should be populated with the value we uncovered with the previous scripts.
 	It is intended for use in a controlled testing environment and should not be used to target production systems or networks without proper authorization.""",
 		epilog="Have fun experimenting with this tool!"
