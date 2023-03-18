@@ -10,7 +10,7 @@ from typing import Optional
 
 def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 	# Define prefix and buffer
-	prefix = b"OVERFLOW2 "														# CHANGE IF NECESSARY
+	prefix = b"OVERFLOW10 "	# CHANGE
 	buffer = b"A"
 	timeout = 5
 	payload = b""

