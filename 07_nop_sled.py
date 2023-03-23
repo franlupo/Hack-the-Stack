@@ -73,8 +73,9 @@ def main(ip: str, port: int, eip_offset: int, overflow_threshold: int, jmp_addre
 
 			# Print server banner
 			try:
-				response = s.recv(4096)
-				print(f"{response.decode()}")
+				while True:
+					response = s.recv(4096)
+					print(f"{response.decode()}")
 			except:
 				pass
 

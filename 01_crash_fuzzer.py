@@ -25,11 +25,12 @@ def main(ip: str, port: int, increment: Optional[int] = None) -> None:
 
 			# Print server banner
 			try:
-				response = s.recv(4096)
-				print(f"{response.decode()}")
+				while True:
+					response = s.recv(4096)
+					print(f"{response.decode()}")
 			except:
 				pass
-
+				
 			# Send data to the server with increasing buffer sizes
 			step = increment or 100
 			for size in itertools.count(step, step):
